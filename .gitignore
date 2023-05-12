@@ -131,3 +131,6 @@ dmypy.json
 # Custom stuff
 references
 data
+templates
+*.sh
+pytodcor.log
