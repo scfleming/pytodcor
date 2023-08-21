@@ -17,7 +17,7 @@ setup(name="pytodcor", version=__version__,
       classifiers=["Programming Language :: Python :: 3"],
       url="https://github.com/scfleming/pytodcor",
       author="Scott W. Fleming",
-      author_email="fleming@stsci.edu", license="MIT"
+      author_email="fleming@stsci.edu", license="MIT",
       packages=["pytodcor"],
       install_requires=["astropy>=5.3.1", "matplotlib>=3.7.2", "numpy>=1.25.2",
                         "specutils>=1.11.0"])
