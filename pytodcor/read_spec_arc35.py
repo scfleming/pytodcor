@@ -7,7 +7,7 @@ import logging
 import os
 from astropy import units as u
 from astropy.io import fits
-from astropy.coordinates import SkyCoord
+from astropy import coordinates as coord
 from astropy.time import Time
 import astropy.wcs as apwcs
 from specutils.spectra import Spectrum1D
@@ -41,14 +41,17 @@ def read_spec_arc35(spec_file):
             logger.error("Did not find a supported value in the EQUINOX header keyword,"
                          " found value = %s", str(equinox))
             raise ValueError("Did not find a supported value in the EQUINOX header keyword,"
-                         " found value = %s", str(equinox))
-        this_coord = SkyCoord(ra=hdr0['RA'], dec=hdr0['DEC'], unit=(u.hourangle, u.deg),
+                         f" found value = {str(equinox)}")
+        this_coord = coord.SkyCoord(ra=hdr0['RA'], dec=hdr0['DEC'], unit=(u.hourangle, u.deg),
                                frame=hdr0['RADECSYS'].lower(), equinox=this_equinox)
 
         # Total exposure time in seconds, to calculate time at mid-point of integration.
         exptime = hdr0['EXPTIME']
-        this_ut_mid = Time(hdr0['UT1'], format='isot', scale='ut1') + (exptime/2.)*u.s
-        this_utc_jd_mid = this_ut_mid.utc.jd
+        this_ut_mid = Time(hdr0['UT1'], format='isot', scale='ut1',
+                           location=coord.EarthLocation.of_site('greenwich')) + (exptime/2.)*u.s
+        # Barycentric correction to the time in days.
+        ltt_barycorr = this_ut_mid.light_travel_time(this_coord)
+        this_tdb_bjd_mid = this_ut_mid.tdb.jd*u.day + ltt_barycorr
 
         # Generate a Spectrum1D object.
         this_wcs = apwcs.WCS(header={'CDELT1': hdr0['CDELT1'], 'CRVAL1': hdr0['CRVAL1'],
@@ -58,10 +61,10 @@ def read_spec_arc35(spec_file):
 
         # Construct the Spectrum object.
         this_spec = Spectrum(name=objname, air_or_vac="air", obj_coord=this_coord,
-                             juldate=this_utc_jd_mid, tel_lat=hdr0['LATITUDE'],
-                             tel_long=hdr0['LONGITUD'], exptime=exptime)
+                             juldate_utc=this_ut_mid.utc.jd, bjuldate_tdb=this_tdb_bjd_mid,
+                             tel_location="apo", exptime=exptime)
         this_spec.add_spec_part(spec)
     else:
         logger.error("File not found: %s", spec_file)
-        raise IOError("File not found: %s", spec_file)
+        raise IOError(f"File not found: {spec_file}")
     return this_spec

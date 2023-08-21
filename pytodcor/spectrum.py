@@ -14,8 +14,8 @@ class Spectrum:
     This class defines a Spectrum object to store spectroscopic data and metadata necessary to
     perform cross-correlation and derive radial velocities.
     """
-    def __init__(self, name="", air_or_vac="", obj_coord=None, juldate=np.nan, bjuldate=np.nan,
-                 tel_lat=np.nan, tel_long=np.nan, exptime=np.nan):
+    def __init__(self, name="", air_or_vac="", obj_coord=None, juldate_utc=np.nan,
+                 bjuldate_tdb=np.nan, tel_location="", exptime=np.nan):
         """
         Class constructor.
         """
@@ -29,11 +29,12 @@ class Spectrum:
             self.air_or_vac = air_or_vac
         else:
             logger.error("air_or_vac argument given unsupported value, was given: %s", air_or_vac)
+            raise ValueError("air_or_vac argument given unsupported value,"
+                             f" was given: {air_or_vac}")
         self.obj_coord = obj_coord
-        self.juldate = juldate
-        self.bjuldate = bjuldate
-        self.tel_lat = tel_lat
-        self.tel_long = tel_long
+        self.juldate_utc = juldate_utc
+        self.bjuldate_tdb = bjuldate_tdb
+        self.tel_location = tel_location
         self.exptime = exptime
 
     def add_spec_part(self, spec):
@@ -48,3 +49,5 @@ class Spectrum:
         else:
             logger.error("Attempt to add spectrum of unsupported type, must be a specutils"
                          " Spectrum1D object, was given type %s", str(type(spec)))
+            raise ValueError("Attempt to add spectrum of unsupported type, must be a specutils"
+                         f" Spectrum1D object, was given type {str(type(spec))}")
