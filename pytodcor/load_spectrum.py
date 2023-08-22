@@ -3,6 +3,7 @@
    :synopsis: Loads spectroscopic data from a supported source.
 """
 
+import argparse
 import logging
 
 from pytodcor import supported_spec_types
@@ -31,28 +32,34 @@ def load_spectrum(spec_type, spec_file):
 
     # Determine if `spec_type` is a known, supported source.
     if spec_type not in supported_spec_types:
+        logger.error("Requested type of spectrum is not in the list of supported types. Must be "
+                     "one of: (%s), received: %s", '; '.join(supported_spec_types), spec_type)
         raise ValueError("Requested type of spectrum is not in the list of supported types."
-                         " Must be one of: (" + '; '.join(supported_spec_types) + "), received: " +
-                         spec_type)
+                         " Must be one of: (" +
+                         '; '.join(supported_spec_types) +
+                         f"), received: {spec_type}")
 
     # Call the function to load the spectroscopic data file.
     if spec_type == "apogee":
-        logger.info("Reading APOGEE spectroscopic data file: " + spec_file)
+        logger.info("Reading APOGEE spectroscopic data file: %s", spec_file)
         this_spec = read_spec_apogee(spec_file)
     elif spec_type == "arc35":
-        logger.info("Reading ARC 3.5m spectroscopic data file: " + spec_file)
+        logger.info("Reading ARC 3.5m spectroscopic data file: %s", spec_file)
         this_spec = read_spec_arc35(spec_file)
 
     return this_spec
 
-if __name__ == "__main__":
-    # Only used for direct testing of the module.
-    import argparse
+def setup_args():
+    """
+    If running from the command-line, the following is executed.
+    """
     parser = argparse.ArgumentParser(description="Load a Spectrum from an input file.")
     parser.add_argument("spec_type", action="store", type=str, help="[Required] Type of spectral "
-                        "data to load.", choices=["apogee", "arc35"])
+                        "data to load.", choices=supported_spec_types)
     parser.add_argument("spec_file", action="store", type=str, help="[Required] Full path and "
                         "name of the input file.")
-    INPUT_ARGS = parser.parse_args()
+    return parser.parse_args()
 
+if __name__ == "__main__":
+    INPUT_ARGS = setup_args()
     load_spectrum(INPUT_ARGS.spec_type, INPUT_ARGS.spec_file)

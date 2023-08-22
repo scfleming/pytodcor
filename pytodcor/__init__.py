@@ -31,6 +31,11 @@ loggers.info('Completed configuring logger()!')
 __version__ = "0.1"
 
 # Supported types of spectroscopic data.
-#   "apogee" = APOGEE apVisit spectra from the Sloan Digital Sky Survey in FITS format.
-#   "arc35" = Calibrated, one-dimensional ARC 3.5m Echelle spectra in FITS format.
+#    "apogee" = APOGEE apVisit spectra from the Sloan Digital Sky Survey in FITS format.
+#    "arc35" = Calibrated, one-dimensional ARC 3.5m Echelle spectra in FITS format.
 supported_spec_types = ["apogee", "arc35"]
+
+# Supported types of spectral models.
+#    "kurucz" = Castelli & Kurucz 2004 models
+#    "bosz" = Bohlin et al. 2017 ATLAS9 models
+supported_model_types = ["bosz", "kurucz"]

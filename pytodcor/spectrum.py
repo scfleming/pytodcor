@@ -15,7 +15,8 @@ class Spectrum:
     perform cross-correlation and derive radial velocities.
     """
     def __init__(self, name="", air_or_vac="", obj_coord=None, juldate_utc=np.nan,
-                 bjuldate_tdb=np.nan, tel_location="", exptime=np.nan):
+                 bjuldate_tdb=np.nan, tel_location="", exptime=np.nan,
+                 teff=np.nan, logg=np.nan, metal=np.nan):
         """
         Class constructor.
         """
@@ -36,6 +37,9 @@ class Spectrum:
         self.bjuldate_tdb = bjuldate_tdb
         self.tel_location = tel_location
         self.exptime = exptime
+        self.teff = teff
+        self.logg = logg
+        self.metal = metal
 
     def add_spec_part(self, spec):
         """
