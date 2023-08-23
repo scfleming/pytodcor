@@ -4,4 +4,6 @@
 """
 
 def read_model_kurucz():
+    """
+    """
     pass
