@@ -6,7 +6,8 @@
 import argparse
 import logging
 
-from pytodcor import supported_model_types
+from pytodcor import supported_models
+from pytodcor.match_model import match_model
 from pytodcor.read_model_bosz import read_model_bosz
 from pytodcor.read_model_kurucz import read_model_kurucz
 
@@ -34,7 +35,7 @@ def _check_bounds(model_type, teff, logg, metal):
                  the library being used.
     """
     if model_type == "kurucz":
-        teff_min_val = 3000.
+        teff_min_val = 3500.
         teff_max_val = 50000.
         if teff < teff_min_val or teff > teff_max_val:
             logger.error("Temperature of model outside bounds supported by Kurucz library. Must be "
@@ -109,18 +110,19 @@ def load_model(model_type, teff, logg, metal):
     :type metal: float
     """
     # Determine if `model_type` is a known, supported library.
-    if model_type not in supported_model_types:
+    if model_type not in supported_models["types"]:
         logger.error("Requested type of model is not in the list of supported libraries. Must be "
-                     "one of: (%s), received: %s", '; '.join(supported_model_types), model_type)
+                     "one of: (%s), received: %s", '; '.join(supported_models["types"]), model_type)
         raise ValueError("Requested type of model is not in the list of supported libraries."
                          " Must be one of: (" +
-                         '; '.join(supported_model_types) +
+                         '; '.join(supported_models["types"]) +
                          f"), received: {model_type}")
 
     # Check if requested parameters are within the bounds of the models available.
     _check_bounds(model_type, teff, logg, metal)
 
     # Identify the closest set of models to read in based on the input parameters.
+    models_to_read = match_model(model_type, teff, logg, metal)
 
     # Read in the model sets.
 
@@ -133,7 +135,7 @@ def setup_args():
     """
     parser = argparse.ArgumentParser(description="Load a model spectrum from a supported type.")
     parser.add_argument("model_type", action="store", type=str, help="[Required] Type of spectral "
-                        "model to load.", choices=supported_model_types)
+                        "model to load.", choices=supported_models["types"])
     parser.add_argument("teff", action="store", type=float, help="[Required] Effective temperature "
                         "of the set of models, in degrees Kelvin.")
     parser.add_argument("logg", action="store", type=float, help="[Required] Surface gravity of "

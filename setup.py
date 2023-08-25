@@ -20,4 +20,4 @@ setup(name="pytodcor", version=__version__,
       author_email="fleming@stsci.edu", license="MIT",
       packages=["pytodcor"],
       install_requires=["astropy>=5.3.1", "matplotlib>=3.7.2", "numpy>=1.25.2",
-                        "specutils>=1.11.0"])
+                        "pandas>=2.0.3", "specutils>=1.11.0"])
