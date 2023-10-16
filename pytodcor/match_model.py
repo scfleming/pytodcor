@@ -110,5 +110,4 @@ def match_model(model_type, teff, logg, metal):
 
     # Locate the closest model match(es) for the requested stellar parameters.
     closest_models = _find_bounding_vals(df_models, teff, logg, metal)
-    print(closest_models)
     return closest_models

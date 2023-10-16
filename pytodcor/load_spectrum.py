@@ -46,7 +46,6 @@ def load_spectrum(spec_type, spec_file):
     elif spec_type == "arc35":
         logger.info("Reading ARC 3.5m spectroscopic data file: %s", spec_file)
         this_spec = read_spec_arc35(spec_file)
-
     return this_spec
 
 def setup_args():

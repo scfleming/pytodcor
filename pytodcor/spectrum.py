@@ -26,7 +26,7 @@ class Spectrum:
         # an Echelle spectrum if the orders have not been stitched into a single spectrum.
         self.parts = []
         self.name = name
-        if air_or_vac in ["", "air", "vaccuum"]:
+        if air_or_vac in ["", "air", "vacuum"]:
             self.air_or_vac = air_or_vac
         else:
             logger.error("air_or_vac argument given unsupported value, was given: %s", air_or_vac)

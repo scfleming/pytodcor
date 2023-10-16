@@ -86,28 +86,36 @@ def _check_bounds(model_type, teff, logg, metal):
             raise ValueError("Metallicity of model outside bounds supported by BOSZ"
                              f" library. Must be > {metal_min_val} and < {metal_max_val}.")
 
-def load_model(model_type, teff, logg, metal):
+def load_model(model_type, teff, logg, metal, ck04_root_dir, bosz_root_dir,
+                model_wl_min=None, model_wl_max=None):
     """
     Loads a set of stellar spectroscopic models from a supported library for a given
     effective temperature, surface gravity, and metallicity.
     :param model_type: The type of model to load. The data format and set of models
                        that get loaded depends on the library being used.
     :type model_type: str
-
     :param teff: The effective temperature to retrieve a model set for. The closest
                  match will be retrieved, as long as it is not outside the range of
                  the library being used.
     :type teff: float
-    
     :param logg: The surface gravity to retrieve a model set for. The closest
                  match will be retrieved, as long as it is not outside the range of
                  the library being used.
     :type logg: float
-
     :param metal: The metallicity to retrieve a model set for. The closest
                  match will be retrieved, as long as it is not outside the range of
                  the library being used.
     :type metal: float
+    :param ck04_root_dir: The root directory containing the Castelli-Kurucz 2004 models.
+    :type ck04_root_dir: str
+    :param bosz_root_dir: The root directory containing the BOSZ models.
+    :type bosz_root_dir: str
+    :param model_wl_min: The minimum wavelength, in Angstroms, of a subset of the spectrum
+                         to return if the full model spectrum isn't requested.
+    :type model_wl_min: float
+    :param model_wl_max: The maximum wavelength, in Angstroms, of a subset of the spectrum
+                         to return if the full model spectrum isn't requested.
+    :type model_wl_max: float
     """
     # Determine if `model_type` is a known, supported library.
     if model_type not in supported_models["types"]:
@@ -125,6 +133,14 @@ def load_model(model_type, teff, logg, metal):
     models_to_read = match_model(model_type, teff, logg, metal)
 
     # Read in the model sets.
+    model_set = []
+    if model_type == "kurucz":
+        for iii in range(len(models_to_read)):
+            # Read in the first model. Must pass in log(g) value since all gravities are grouped
+            # into one file.
+            model_set.append(read_model_kurucz(ck04_root_dir + models_to_read['file'].iloc[iii],
+                                                models_to_read["logg"].iloc[iii], model_wl_min,
+                                                model_wl_max))
 
     # TO-DO: Linearly interpolate between the two bounding set of models if not
     # an exact match in the model grids.
@@ -142,8 +158,21 @@ def setup_args():
                         "the set of models, as log(g).")
     parser.add_argument("metal", action="store", type=float, help="[Required] Metallicity of "
                         "the set of models.")
+    parser.add_argument("--ck04_root_dir", action="store", type=str, help="Root directory"
+                        " containing the Castelli-Kurucz 2004 model sets.",
+                          default="templates/ck04/")
+    parser.add_argument("--bosz_root_dir", action="store", type=str, help="Root directory"
+                        " containing the BOSZ model sets.", default="templates/bosz/")
+    parser.add_argument("--model_wl_min", action="store", type=float, help="Limit model spectra"
+                        " to only wavelengths greater than this value, specified in Angstroms.",
+                          default=None)
+    parser.add_argument("--model_wl_max", action="store", type=float, help="Limit model spectra"
+                        " to only wavelengths less than this value, specified in Angstroms.",
+                          default=None)
     return parser.parse_args()
 
 if __name__ == "__main__":
     INPUT_ARGS = setup_args()
-    load_model(INPUT_ARGS.model_type, INPUT_ARGS.teff, INPUT_ARGS.logg, INPUT_ARGS.metal)
+    load_model(INPUT_ARGS.model_type, INPUT_ARGS.teff, INPUT_ARGS.logg, INPUT_ARGS.metal,
+                INPUT_ARGS.ck04_root_dir, INPUT_ARGS.bosz_root_dir, INPUT_ARGS.model_wl_min,
+                INPUT_ARGS.model_wl_max)
