@@ -7,8 +7,8 @@ import argparse
 import logging
 
 from pytodcor import supported_spec_types
-from pytodcor.read_spec_apogee import read_spec_apogee
-from pytodcor.read_spec_arc35 import read_spec_arc35
+from pytodcor.obs.read_spec_apogee import read_spec_apogee
+from pytodcor.obs.read_spec_arc35 import read_spec_arc35
 
 logger = logging.getLogger("load_spectrum")
 

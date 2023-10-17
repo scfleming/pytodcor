@@ -9,12 +9,12 @@ import logging
 from astropy import units as u
 import numpy as np
 from specutils.spectra import Spectrum1D
-from pytodcor.spectrum import Spectrum
 
 from pytodcor import supported_models
-from pytodcor.match_model import match_model
-from pytodcor.read_model_bosz import read_model_bosz
-from pytodcor.read_model_kurucz import read_model_kurucz
+from pytodcor.lib.spectrum import Spectrum
+from pytodcor.model.match_model import match_model
+from pytodcor.model.read_model_bosz import read_model_bosz
+from pytodcor.model.read_model_kurucz import read_model_kurucz
 
 logger = logging.getLogger("load_model")
 

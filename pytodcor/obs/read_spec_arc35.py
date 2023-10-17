@@ -5,13 +5,15 @@
 
 import logging
 import os
+
 from astropy import units as u
 from astropy.io import fits
 from astropy import coordinates as coord
 from astropy.time import Time
 import astropy.wcs as apwcs
 from specutils.spectra import Spectrum1D
-from pytodcor.spectrum import Spectrum
+
+from pytodcor.lib.spectrum import Spectrum
 
 logger = logging.getLogger("read_spec_arc35")
 

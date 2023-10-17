@@ -6,6 +6,7 @@
 import logging
 import os
 from astropy.io import fits
+
 logger = logging.getLogger("read_model_kurucz")
 
 def read_model_kurucz(model_file, model_logg):
