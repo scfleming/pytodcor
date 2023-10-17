@@ -6,6 +6,11 @@
 import argparse
 import logging
 
+from astropy import units as u
+import numpy as np
+from specutils.spectra import Spectrum1D
+from pytodcor.spectrum import Spectrum
+
 from pytodcor import supported_models
 from pytodcor.match_model import match_model
 from pytodcor.read_model_bosz import read_model_bosz
@@ -134,13 +139,42 @@ def load_model(model_type, teff, logg, metal, ck04_root_dir, bosz_root_dir,
 
     # Read in the model sets.
     model_set = []
-    if model_type == "kurucz":
-        for iii in range(len(models_to_read)):
-            # Read in the first model. Must pass in log(g) value since all gravities are grouped
+    for iii in range(len(models_to_read)):
+        if model_type == "kurucz":
+            # Read in the models. Must pass in log(g) value since all gravities are grouped
             # into one file.
-            model_set.append(read_model_kurucz(ck04_root_dir + models_to_read['file'].iloc[iii],
-                                                models_to_read["logg"].iloc[iii], model_wl_min,
-                                                model_wl_max))
+            this_airorvac = "vacuum"
+            (objname, these_wls, these_fls) = read_model_kurucz(ck04_root_dir +
+                                                                 models_to_read['file'].iloc[iii],
+                                                                 models_to_read["logg"].iloc[iii])
+        elif model_type == "bosz":
+            # Read in the models.
+            this_airorvac = "vacuum"
+            (objname, these_wls, these_fls) = read_model_bosz(bosz_root_dir +
+                                                               models_to_read['file'].iloc[iii])
+
+        # If requested, extract only a subset based on the wavelength range.
+        keep_indices = np.where(
+            (these_wls >= model_wl_min if model_wl_min else np.isfinite(these_wls)) &
+            (these_wls <= model_wl_max if model_wl_max else np.isfinite(these_wls)))[0]
+        if len(keep_indices) > 0:
+            these_wls = these_wls[keep_indices]
+            these_fls = these_fls[keep_indices]
+        else:
+            logger.error("No model spectra contained within requested wavelength range: " +
+                        "%s <= wavelength <= %s", str(model_wl_min), str(model_wl_max))
+            raise ValueError("No model spectra contained within requested wavelength range: " +
+                        f"{str(model_wl_min)} <= wavelength <= {str(model_wl_max)}")
+
+        # Noramlize the fluxes since only flux-normalized spectra are needed for cross-correlation.
+        these_fls = these_fls / np.nanmax(these_fls)
+        spec = Spectrum1D(flux=these_fls*u.dimensionless_unscaled,
+                           spectral_axis=these_wls*u.angstrom)
+
+        # Construct the Spectrum object.
+        this_spec = Spectrum(name=objname, air_or_vac=this_airorvac)
+        this_spec.add_spec_part(spec)
+        model_set.append(this_spec)
 
     # TO-DO: Linearly interpolate between the two bounding set of models if not
     # an exact match in the model grids.
