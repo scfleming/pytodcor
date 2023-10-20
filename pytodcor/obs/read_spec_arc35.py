@@ -5,6 +5,7 @@
 
 import logging
 import os
+import numpy as np
 
 from astropy import units as u
 from astropy.io import fits
@@ -17,13 +18,18 @@ from pytodcor.lib.spectrum import Spectrum
 
 logger = logging.getLogger("read_spec_arc35")
 
-def read_spec_arc35(spec_file):
+def read_spec_arc35(spec_file, wl_min=None, wl_max=None):
     """
     Reads an APO 3.5m ARC file to extract spectroscopic information.
 
     :param spec_file: The full path and name of the file containing the spectroscopic data to load.
     :type spec_file: str
-
+    :param wl_min: The minimum wavelength, in Angstroms, of a subset of the spectrum
+                    to return if the full spectrum isn't requested.
+    :type wl_min: float
+    :param wl_max: The maximum wavelength, in Angstroms, of a subset of the spectrum
+                    to return if the full spectrum isn't requested.
+    :type wl_max: float
     :returns: dict -- Spectroscopic data and metadata from the file.
     """
     if os.path.isfile(spec_file):
@@ -59,9 +65,24 @@ def read_spec_arc35(spec_file):
         this_wcs = apwcs.WCS(header={'CDELT1': hdr0['CDELT1'], 'CRVAL1': hdr0['CRVAL1'],
                                       'CUNIT1': 'Angstrom', 'CTYPE1': hdr0['CTYPE1'],
                                       'CRPIX1': hdr0['CRPIX1']})
-        spec = Spectrum1D(flux=dat0*u.dimensionless_unscaled, wcs=this_wcs)
+        these_wls = this_wcs.pixel_to_world(range(len(dat0)))
+        these_fls = dat0*u.dimensionless_unscaled
+
+        # If requested, extract only a subset based on the wavelength range.
+        keep_indices = np.where(
+            (these_wls >= wl_min*u.angstrom if wl_min else np.isfinite(these_wls)) &
+            (these_wls <= wl_max*u.angstrom if wl_max else np.isfinite(these_wls)))[0]
+        if len(keep_indices) > 0:
+            these_wls = these_wls[keep_indices]
+            these_fls = these_fls[keep_indices]
+        else:
+            logger.error("No model spectra contained within requested wavelength range: " +
+                        "%s <= wavelength <= %s", str(wl_min), str(wl_max))
+            raise ValueError("No model spectra contained within requested wavelength range: " +
+                        f"{str(wl_min)} <= wavelength <= {str(wl_max)}")
 
         # Construct the Spectrum object.
+        spec = Spectrum1D(flux=these_fls, spectral_axis=these_wls)
         this_spec = Spectrum(name=objname, air_or_vac="air", obj_coord=this_coord,
                              juldate_utc=this_ut_mid.utc.jd, bjuldate_tdb=this_tdb_bjd_mid,
                              tel_location="apo", exptime=exptime)

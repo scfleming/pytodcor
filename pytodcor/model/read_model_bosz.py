@@ -16,7 +16,7 @@ def read_model_bosz(model_file):
     :param model_file: The full path and name of the file containing the spectroscopic
                        model data to load.
     :type model_file: str
-    :returns: list -- Spectroscopic data and object name based on the file.
+    :returns: tuple -- Spectroscopic data and object name based on the file.
     """
     if os.path.isfile(model_file):
         with fits.open(model_file) as hdulist:
@@ -27,7 +27,7 @@ def read_model_bosz(model_file):
 
         # Generate a Spectrum1D object.
         wls = dat1['wavelength']
-        fls = dat1['specificintensity']
+        fls = dat1['specificintensity'] / dat1['continuum']
     else:
         logger.error("File not found: %s", model_file)
         raise IOError(f"File not found: {model_file}")

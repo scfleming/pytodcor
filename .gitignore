@@ -14,7 +14,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -129,8 +128,9 @@ dmypy.json
 .pyre/
 
 # Custom stuff
+analysis
+data  
 references
-data
 templates
 *.sh
 pytodcor.log

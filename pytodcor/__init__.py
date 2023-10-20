@@ -39,7 +39,6 @@ supported_spec_types = ["apogee", "arc35"]
 #    "kurucz" = Castelli & Kurucz 2004 models
 #    "bosz" = Bohlin et al. 2017 ATLAS9 models
 supported_models = {"types":["bosz", "kurucz"],
-                    "dirs":{"bosz":"templates/bosz/", "kurucz":"templates/ck04/"},
                     "lookup_files":{"bosz":"bosz_model_files_and_parmas.txt",
                                      "kurucz":"kurucz_model_files_and_params.txt"}
                     }

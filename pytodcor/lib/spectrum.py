@@ -55,3 +55,4 @@ class Spectrum:
                          " Spectrum1D object, was given type %s", str(type(spec)))
             raise ValueError("Attempt to add spectrum of unsupported type, must be a specutils"
                          f" Spectrum1D object, was given type {str(type(spec))}")
+    

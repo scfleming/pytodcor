@@ -18,7 +18,7 @@ def read_model_kurucz(model_file, model_logg):
     :type model_file: str
     :param model_logg: The log(g) surface gravity of the model to retrieve.
     :type model_logg: float
-    :returns: list -- Spectroscopic data and object name based on the file.
+    :returns: tuple -- Spectroscopic data and object name based on the file.
     """
     if os.path.isfile(model_file):
         with fits.open(model_file) as hdulist:

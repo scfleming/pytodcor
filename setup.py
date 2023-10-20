@@ -9,7 +9,7 @@
 .. moduleauthor:: Scott W. Fleming <fleming@stsci.edu>
 """
 
-from setuptools import setup
+from setuptools import setup, find_packages
 from pytodcor import __version__
 
 setup(name="pytodcor", version=__version__,
@@ -18,6 +18,6 @@ setup(name="pytodcor", version=__version__,
       url="https://github.com/scfleming/pytodcor",
       author="Scott W. Fleming",
       author_email="fleming@stsci.edu", license="MIT",
-      packages=["pytodcor"],
+      packages=find_packages(),
       install_requires=["astropy>=5.3.1", "matplotlib>=3.7.2", "numpy>=1.25.2",
                         "pandas>=2.0.3", "specutils>=1.11.0"])

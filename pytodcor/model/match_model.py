@@ -71,7 +71,7 @@ def _find_bounding_vals(df, teff, logg, metal):
                                        return_ind_07.values, return_ind_08.values]))
     return df.iloc[return_inds]
 
-def match_model(model_type, teff, logg, metal):
+def match_model(model_type, teff, logg, metal, lookup_dir):
     """
     Identifies the closest models based on requested stellar parameters.
     :param model_type: The type of model to load. The data format and set of models
@@ -87,21 +87,21 @@ def match_model(model_type, teff, logg, metal):
                  match will be retrieved, as long as it is not outside the range of
                  the library being used.
     :type logg: float
-
     :param metal: The metallicity to retrieve a model set for. The closest
                  match will be retrieved, as long as it is not outside the range of
                  the library being used.
-
+    :param lookup_dir: The root directory containing the lookup table for the models.
+    :type lookup_dir: str
     :returns: list -- The closest models to the requested stellar parameters. The length
                       of the return can be a one-element or an eight-element list, depending
                       on if there's an exact match or a need to provide a bounding box.
     """
     # Read in the look-up table for this model.
-    lookup_table_dir = supported_models["dirs"][model_type]
-    if not os.path.isdir(lookup_table_dir):
-        logger.error("Model directory not found: %s", lookup_table_dir)
-        raise IOError(f"Model directory not found: {lookup_table_dir}")
-    lookup_table_file = lookup_table_dir + supported_models["lookup_files"][model_type]
+
+    if not os.path.isdir(lookup_dir):
+        logger.error("Model directory not found: %s", lookup_dir)
+        raise IOError(f"Model directory not found: {lookup_dir}")
+    lookup_table_file = lookup_dir + supported_models["lookup_files"][model_type]
     if not os.path.isfile(lookup_table_file):
         logger.error("Model lookup table not found: %s", lookup_table_file)
         raise IOError(f"Model lookup table not found: {lookup_table_file}")

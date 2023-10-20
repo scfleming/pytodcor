@@ -23,18 +23,16 @@ def _check_bounds(model_type, teff, logg, metal):
     Verifies requested parameters are within the bounds of the model library being requested.
     :param model_type: The type of model to load. The data format and set of models
                        that get loaded depends on the library being used.
+    
     :type model_type: str
-
     :param teff: The effective temperature to retrieve a model set for. The closest
                  match will be retrieved, as long as it is not outside the range of
                  the library being used.
     :type teff: float
-    
     :param logg: The surface gravity to retrieve a model set for. The closest
                  match will be retrieved, as long as it is not outside the range of
                  the library being used.
     :type logg: float
-
     :param metal: The metallicity to retrieve a model set for. The closest
                  match will be retrieved, as long as it is not outside the range of
                  the library being used.
@@ -91,8 +89,8 @@ def _check_bounds(model_type, teff, logg, metal):
             raise ValueError("Metallicity of model outside bounds supported by BOSZ"
                              f" library. Must be > {metal_min_val} and < {metal_max_val}.")
 
-def load_model(model_type, teff, logg, metal, ck04_root_dir, bosz_root_dir,
-                model_wl_min=None, model_wl_max=None):
+def load_model(model_type, teff, logg, metal, ck04_root_dir="templates/ck04/",
+                bosz_root_dir="templates/bosz/", model_wl_min=None, model_wl_max=None):
     """
     Loads a set of stellar spectroscopic models from a supported library for a given
     effective temperature, surface gravity, and metallicity.
@@ -135,7 +133,11 @@ def load_model(model_type, teff, logg, metal, ck04_root_dir, bosz_root_dir,
     _check_bounds(model_type, teff, logg, metal)
 
     # Identify the closest set of models to read in based on the input parameters.
-    models_to_read = match_model(model_type, teff, logg, metal)
+    if model_type == "ck04":
+        lookup_dir = ck04_root_dir
+    elif model_type == "bosz":
+        lookup_dir = bosz_root_dir
+    models_to_read = match_model(model_type, teff, logg, metal, lookup_dir)
 
     # Read in the model sets.
     model_set = []
@@ -178,6 +180,10 @@ def load_model(model_type, teff, logg, metal, ck04_root_dir, bosz_root_dir,
 
     # TO-DO: Linearly interpolate between the two bounding set of models if not
     # an exact match in the model grids.
+
+    # Return the model spectrum. Until interpolation is achieved, just return the
+    # first one in the matched set.
+    return model_set[0]
 
 def setup_args():
     """
