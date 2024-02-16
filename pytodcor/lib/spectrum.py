@@ -6,6 +6,7 @@
 import logging
 import numpy as np
 from specutils.spectra import Spectrum1D
+from specutils.manipulation import FluxConservingResampler
 
 logger = logging.getLogger("spectrum")
 
@@ -41,12 +42,38 @@ class Spectrum:
         self.logg = logg
         self.metal = metal
 
+    def __add__(self, other):
+        """
+        Combines two spectra by combining their fluxes through addition. Wavelength grids must
+        be identical. Does not combine any other metadata values. Fluxes are returned normalized
+        by the maximum non-NaN value.
+        """
+        if len(self.parts) != len(other.parts):
+            logger.error("Spectra must have the same number of parts to combine"
+            " through addition.")
+            raise ValueError("Spectra must have the same number of parts to combine"
+            " through addition.")
+
+        # New Spectrum object to be returned. Combine the names of the input sources together but
+        # don't combine any other metadata.
+        combined_spec = Spectrum(name=self.name + "," + other.name)
+
+        for (ii, spart), opart in zip(enumerate(self.parts), other.parts):
+            # Interpolate onto a common wavelength grid.
+            fluxcon = FluxConservingResampler()
+            opart_resampled = fluxcon(opart, spart.spectral_axis)
+            # Add this part to the combined Spectrum class.
+            combined_spec.add_spec_part(spart + opart_resampled)
+            # Re-normalize the spectrum.
+            combined_spec.parts[ii] /= np.nanmax(combined_spec.parts[ii].flux)
+        return combined_spec
+
     def add_spec_part(self, spec):
         """
         Adds a new "part" of wavelengths and fluxes via a Spectrum1D object.
 
         :param spec: The one-dimensional spectrum for this part.
-        :type wls: specutils.Spectrum1D
+        :type spec: specutils.Spectrum1D
         """
         if isinstance(spec, Spectrum1D):
             self.parts.append(spec)

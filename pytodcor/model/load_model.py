@@ -92,8 +92,10 @@ def _check_bounds(model_type, teff, logg, metal):
 def load_model(model_type, teff, logg, metal, ck04_root_dir="templates/ck04/",
                 bosz_root_dir="templates/bosz/", model_wl_min=None, model_wl_max=None):
     """
-    Loads a set of stellar spectroscopic models from a supported library for a given
-    effective temperature, surface gravity, and metallicity.
+    Loads a stellar spectroscopic model from a supported library for a given
+    effective temperature, surface gravity, and metallicity. Will interpolate
+    between model grids as needed.
+
     :param model_type: The type of model to load. The data format and set of models
                        that get loaded depends on the library being used.
     :type model_type: str
@@ -119,6 +121,7 @@ def load_model(model_type, teff, logg, metal, ck04_root_dir="templates/ck04/",
     :param model_wl_max: The maximum wavelength, in Angstroms, of a subset of the spectrum
                          to return if the full model spectrum isn't requested.
     :type model_wl_max: float
+    :returns: pytodcor.Spectrum -- The spectrum derived from the models.
     """
     # Determine if `model_type` is a known, supported library.
     if model_type not in supported_models["types"]:
