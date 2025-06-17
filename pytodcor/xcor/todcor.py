@@ -14,6 +14,8 @@ from specutils.analysis import template_logwl_resample
 from specutils.manipulation import FluxConservingResampler
 from pytodcor.xcor.xcor1d import xcor1d
 
+import matplotlib.pyplot as plt
+
 logger = logging.getLogger("todcor")
 
 def _find_rel_shift(lag_i, lag_j):
@@ -60,6 +62,9 @@ def todcor(obs_spec, model_1, model_2, n_pix_shifts, fixed_alpha=None, vel_range
                        ratios between the two templates.
     """
 
+    # DEBUG
+    debug = True
+
     # Set a velocity range limit if none is provided.
     if not vel_range:
         vel_range = [-1000., 1000.]
@@ -72,10 +77,35 @@ def todcor(obs_spec, model_1, model_2, n_pix_shifts, fixed_alpha=None, vel_range
     print("Resampling observed spectrum and first template to a common log-lambda wavelength"
           " scale...")
     tstart = time.process_time()
+    # This uses a flux conservation resampler, see https://ui.adsabs.harvard.edu/abs/2017arXiv170505165C/abstract for
+    # the algorithm.
     obs_spec_loglin, model_1_loglin = template_logwl_resample(obs_spec, model_1,
                                                                resampler=FluxConservingResampler())
     logger.info("...total time taken = %s seconds.", str(time.process_time() - tstart))
     print(f"...total time taken = {str(time.process_time() - tstart)} seconds.")
+    
+    ## DEBUG
+    if debug:
+        print(np.diff(obs_spec.spectral_axis[0:40]))
+        print(np.diff(obs_spec_loglin.spectral_axis[0:40]))
+        fig, (ax1, ax2) = plt.subplots(1,2, figsize=(12,6))
+        ax1.plot(obs_spec.spectral_axis, obs_spec.flux, '-ko', label="Original")
+        ax1.plot(obs_spec_loglin.spectral_axis, obs_spec_loglin.flux-0.005, '-ro', label="Log-Lin Flux Cons")
+        ax1.axvline(x=5420, color="black")
+        #ax1.set_xlim([5417, 5423])
+        ax1.set_xlim([5377, 5383])
+        ax1.set_ylim([0.06, 0.105])
+        ax1.set_title("Obs Spec")
+        ax1.legend()
+
+        ax2.plot(model_1.spectral_axis, model_1.flux, '-ko', label="Original")
+        ax2.plot(model_1_loglin.spectral_axis, model_1_loglin.flux-0.005, '-ro', label="Log-Lin Flux Cons")
+        ax2.axvline(x=5380, color="black")
+        ax2.set_xlim([5377, 5383])
+        ax2.set_ylim([0.06, 0.105])
+        ax2.set_title("Mod1")
+        plt.show()
+    ## END DEBUG
 
     logger.info("Resampling observed spectrum and second template to a common log-lambda wavelength"
                 " scale...")
@@ -84,6 +114,7 @@ def todcor(obs_spec, model_1, model_2, n_pix_shifts, fixed_alpha=None, vel_range
     tstart = time.process_time()
     _, model_2_loglin = template_logwl_resample(obs_spec, model_2,
                                                  resampler=FluxConservingResampler())
+    _, model_2_loglin_lin = template_logwl_resample(obs_spec, model_2)
     logger.info("...total time taken = %s seconds.", str(time.process_time() - tstart))
     print(f"...total time taken = {str(time.process_time() - tstart)} seconds.")
 
@@ -108,7 +139,6 @@ def todcor(obs_spec, model_1, model_2, n_pix_shifts, fixed_alpha=None, vel_range
     # Each combination of model1 and model2 shift has a single corresponding alpha.
     # So the dimension is (2*npixshift+1, 2*npixshift+1)
     todcor_pix_dim = n_pix_shifts*2+1
-    todcor_pixshifts = np.arange(todcor_pix_dim) - n_pix_shifts
     todcor_vals = np.zeros((todcor_pix_dim, todcor_pix_dim),
                                          dtype=np.float32)
     todcor_alphas = np.zeros((todcor_pix_dim, todcor_pix_dim),
@@ -120,9 +150,57 @@ def todcor(obs_spec, model_1, model_2, n_pix_shifts, fixed_alpha=None, vel_range
 
     # Calculate cross-correlation function of observed spectrum versus model_1.
     corr1, lag1 = xcor1d(obs_spec_loglin.flux, model_1_loglin.flux)
+    corr1_orig, lag1_orig = xcor1d(obs_spec.flux, model_1.flux)
+
+    ## DEBUG
+    if debug:
+        plt.figure(figsize=(12, 6))
+        plt.plot(obs_spec.spectral_axis, obs_spec.flux, '-ko', label="Original")
+        plt.plot(obs_spec_loglin.spectral_axis, obs_spec_loglin.flux, '-ro', label="Log-Lin Flux Cons")
+        plt.xlim(5377, 5383)
+        plt.ylim(0.06, 0.105)
+        plt.legend()
+        plt.show()
+        specwls = np.asarray(obs_spec.spectral_axis)
+        specwls2 = np.asarray(obs_spec_loglin.spectral_axis)
+
+        plt.plot(lag1, corr1, '-ro', label="Log-Lin Cons")
+        plt.plot(lag1_orig, corr1_orig, '-ko', label="Orig")
+        plt.xlim(-10, 10)
+        plt.ylim(0.5, 1.0)
+        plt.legend()
+        plt.show()
+        plt.plot(lag1, corr1, '-ro', label="Log-Lin Cons")
+        plt.plot(lag1_orig, corr1_orig, '-ko', label="Orig")
+        plt.xlim(190, 215)
+        plt.ylim(0.5, 1.0)
+        plt.legend()
+        plt.show()
+        print("Max value at lag (no resampling) = " + str(lag1_orig[np.argmax(corr1_orig)]))
+        print("Max value at lag (flux cons. resampling) = " + str(lag1[np.argmax(corr1)]))
+        temp_keep = np.where(lag1_orig > 100)[0]
+        temp_y = corr1_orig[temp_keep]
+        temp_x = lag1_orig[temp_keep]
+        temp_keep_fluxcons = np.where(lag1 > 100)[0]
+        temp_y_fluxcons = corr1[temp_keep_fluxcons]
+        temp_x_fluxcons = lag1[temp_keep_fluxcons]
+        print("Max value at lag (right hand side, no resampling) = " + str(temp_x[np.argmax(temp_y)]))
+        print("Max value at lag (right hand side, flux cons. resampling) = " + str(temp_x_fluxcons[np.argmax(temp_y_fluxcons)]))
+    ## END DEBUG
 
     # Calculate cross-correlation function of observed spectrum versus model_2.
     corr2, lag2 = xcor1d(obs_spec_loglin.flux, model_2_loglin.flux)
+    corr2_orig, lag2_orig = xcor1d(obs_spec.flux, model_2.flux)
+
+    ## DEBUG
+    if debug:
+        plt.plot(lag2, corr2, '-ro', label="Log-Lin Cons")
+        plt.plot(lag2_orig, corr2_orig, '-ko', label="Orig")
+        plt.xlim(-215, -185)
+        plt.ylim(0.5, 1.0)
+        plt.legend()
+        plt.show()
+    ## END DEBUG
 
     # Calculate cross-correlation function of model_1 versus model_2.
     corr12, lag12 = xcor1d(model_1_loglin.flux, model_2_loglin.flux)
@@ -162,6 +240,10 @@ def todcor(obs_spec, model_1, model_2, n_pix_shifts, fixed_alpha=None, vel_range
     corr12 = corr12[where_keep12]
     lag12 = lag12[where_keep12]
 
+    if all(lag1 != lag2):
+        logger.error("The lag arrays for first and second templates don't match after trim.")
+        raise ValueError("The lag arrays for first and second templates don't match after trim.")
+
     # Compute the TODCOR value following the equation A3 in Zucker & Mazeh 1994.
     logger.info("Calculating TODCOR values and populating the two-dimensional surface...")
     print("Calculating TODCOR values and populating the two-dimensional surface...")
@@ -170,10 +252,8 @@ def todcor(obs_spec, model_1, model_2, n_pix_shifts, fixed_alpha=None, vel_range
     if fixed_alpha:
         # This is alpha_prime im the Appendix of Zucker & Mazeh 1994.
         alphap = np.std(model_2_loglin.flux) / np.std(model_1_loglin.flux) * fixed_alpha
-        for i, corr1i in enumerate(corr1):
-            for j, corr2j in enumerate(corr2):
-                lag_i = lag1[i]
-                lag_j = lag2[j]
+        for i, (lag_i, corr1i) in enumerate(zip(lag1, corr1)):
+            for j, (lag_j, corr2j) in enumerate(zip(lag2, corr2)):
                 lag_ji = _find_rel_shift(lag_i, lag_j)
                 lag_ji_ind = np.where(lag12 == lag_ji)[0]
                 todcor_vals[i,j] = (corr1i + alphap * corr2j /
@@ -182,4 +262,4 @@ def todcor(obs_spec, model_1, model_2, n_pix_shifts, fixed_alpha=None, vel_range
     logger.info("...total time taken = %s seconds.", str(time.process_time() - tstart))
     print(f"...total time taken = {str(time.process_time() - tstart)} seconds.")
 
-    return (todcor_pixshifts, vel_per_pix, todcor_vals, todcor_alphas)
+    return (lag1, vel_per_pix, todcor_vals, todcor_alphas)
