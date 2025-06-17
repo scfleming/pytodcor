@@ -1,3 +1,32 @@
 [build-system]
 requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["pytodcor"]
+
+[project]
+name = "pytodcor"
+version = "0.1"
+dependencies = [
+	     "astropy",
+	     "matplotlib",
+	     "numpy",
+	     "pandas",
+	     "specutils",
+]
+requires-python = ">=3.9"
+authors = [
+	{name = "Scott W. Fleming"}
+]
+maintainers = [
+	{name = "Scott W. Fleming"}
+]
+description = "Python-based two-dimensional cross-correlation of astronomical spectra."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+
+[project.urls]
+Repository = "https://github.com/scfleming/pytodcor"
+
