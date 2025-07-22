@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 from scipy.stats import norm
-from pytodcor import xcor1d
+from pytodcor.xcor.xcor1d import xcor1d
 
 def test_xcor1d_identical_gauss_no_shift():
     # Generate the Gaussians to use.

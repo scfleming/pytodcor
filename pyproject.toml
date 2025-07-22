@@ -2,9 +2,6 @@
 requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools]
-packages = ["pytodcor"]
-
 [project]
 name = "pytodcor"
 version = "0.1"
@@ -31,3 +28,10 @@ license-files = ["LICENSE"]
 [project.urls]
 Repository = "https://github.com/scfleming/pytodcor"
 
+[tool.setuptools]
+packages = ["pytodcor"]
+
+[tool.pytest.ini_options]
+addopts = [
+    "--import-mode=importlib", 
+]
