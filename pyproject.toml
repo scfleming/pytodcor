@@ -32,8 +32,4 @@ Repository = "https://github.com/scfleming/pytodcor"
 packages = ["pytodcor"]
 
 [tool.pytest.ini_options]
-addopts = [
-    "--import-mode=importlib",
-]
-[tool.pytest.ini_options]
 pythonpath = "pytodcor"
