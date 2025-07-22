@@ -31,5 +31,3 @@ Repository = "https://github.com/scfleming/pytodcor"
 [tool.setuptools]
 packages = ["pytodcor"]
 
-[tool.pytest.ini_options]
-pythonpath = "pytodcor"
