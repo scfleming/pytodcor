@@ -78,9 +78,8 @@ jobs:
         python-version: ${{ matrix.python }}
     - name: Install Python dependencies
       run: python -m pip install --upgrade tox codecov sphinx_rtd_theme
-    - name: Set PYTHONPATH
+    - name: Print PYTHONPATH
       run: echo "PYTHONPATH: $PYTHONPATH"
-      run: python -c "import sys; print('sys.path:', sys.path)"
     - name: Run tests
       run: tox ${{ matrix.toxargs }} -e ${{ matrix.toxenv }} -- ${{ matrix.toxposargs }}
     - name: Upload coverage to codecov
