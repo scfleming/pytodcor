@@ -35,6 +35,5 @@ packages = ["pytodcor"]
 addopts = [
     "--import-mode=importlib",
 ]
-pythonpath = [
-    "pytodcor",
-]
+[tool.pytest.ini_options]
+pythonpath = "pytodcor"
