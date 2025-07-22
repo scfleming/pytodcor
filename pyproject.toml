@@ -14,8 +14,9 @@ dependencies = [
 	     "numpy",
 	     "pandas",
 	     "specutils",
+	     "pytest",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 authors = [
 	{name = "Scott W. Fleming"}
 ]
