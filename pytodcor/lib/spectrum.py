@@ -5,12 +5,12 @@
 
 import logging
 import numpy as np
-from specutils.spectra import Spectrum1D
+from specutils.spectra import Spectrum
 from specutils.manipulation import FluxConservingResampler
 
 logger = logging.getLogger("spectrum")
 
-class Spectrum:
+class PytodcorSpectrum:
     """
     This class defines a Spectrum object to store spectroscopic data and metadata necessary to
     perform cross-correlation and derive radial velocities.
@@ -56,7 +56,7 @@ class Spectrum:
 
         # New Spectrum object to be returned. Combine the names of the input sources together but
         # don't combine any other metadata.
-        combined_spec = Spectrum(name=self.name + "," + other.name)
+        combined_spec = PytodcorSpectrum(name=self.name + "," + other.name)
 
         for (ii, spart), opart in zip(enumerate(self.parts), other.parts):
             # Interpolate onto a common wavelength grid.
@@ -70,16 +70,16 @@ class Spectrum:
 
     def add_spec_part(self, spec):
         """
-        Adds a new "part" of wavelengths and fluxes via a Spectrum1D object.
+        Adds a new "part" of wavelengths and fluxes via a Spectrum object.
 
         :param spec: The one-dimensional spectrum for this part.
-        :type spec: specutils.Spectrum1D
+        :type spec: specutils.Spectrum
         """
-        if isinstance(spec, Spectrum1D):
+        if isinstance(spec, Spectrum):
             self.parts.append(spec)
         else:
             logger.error("Attempt to add spectrum of unsupported type, must be a specutils"
-                         " Spectrum1D object, was given type %s", str(type(spec)))
+                         " Spectrum object, was given type %s", str(type(spec)))
             raise ValueError("Attempt to add spectrum of unsupported type, must be a specutils"
-                         f" Spectrum1D object, was given type {str(type(spec))}")
+                         f" Spectrum object, was given type {str(type(spec))}")
     

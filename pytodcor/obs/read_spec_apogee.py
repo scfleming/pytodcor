@@ -3,7 +3,7 @@
    :synopsis: Reads an APOGEE apVisit file containing spectroscopic data.
 """
 
-from pytodcor.lib.spectrum import Spectrum
+from pytodcor.lib.spectrum import PytodcorSpectrum
 
 def read_spec_apogee(spec_file):
     """

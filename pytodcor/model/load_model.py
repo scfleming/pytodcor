@@ -8,10 +8,10 @@ import logging
 
 from astropy import units as u
 import numpy as np
-from specutils.spectra import Spectrum1D
+from specutils.spectra import Spectrum
 
 from pytodcor import supported_models
-from pytodcor.lib.spectrum import Spectrum
+from pytodcor.lib.spectrum import PytodcorSpectrum
 from pytodcor.model.match_model import match_model
 from pytodcor.model.read_model_bosz import read_model_bosz
 from pytodcor.model.read_model_kurucz import read_model_kurucz
@@ -173,11 +173,11 @@ def load_model(model_type, teff, logg, metal, ck04_root_dir="templates/ck04/",
 
         # Noramlize the fluxes since only flux-normalized spectra are needed for cross-correlation.
         these_fls = these_fls / np.nanmax(these_fls)
-        spec = Spectrum1D(flux=these_fls*u.dimensionless_unscaled,
+        spec = Spectrum(flux=these_fls*u.dimensionless_unscaled,
                            spectral_axis=these_wls*u.angstrom)
 
         # Construct the Spectrum object.
-        this_spec = Spectrum(name=objname, air_or_vac=this_airorvac)
+        this_spec = PytodcorSpectrum(name=objname, air_or_vac=this_airorvac)
         this_spec.add_spec_part(spec)
         model_set.append(this_spec)
 
