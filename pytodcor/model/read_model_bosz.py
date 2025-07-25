@@ -25,7 +25,7 @@ def read_model_bosz(model_file):
         # Set target name based on model file (add logg as well for CK04).
         objname = os.path.basename(model_file).split('.fits')[0]
 
-        # Generate a Spectrum1D object.
+        # Generate a Spectrum object.
         wls = dat1['wavelength']
         fls = dat1['specificintensity'] / dat1['continuum']
     else:

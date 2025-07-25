@@ -12,9 +12,9 @@ from astropy.io import fits
 from astropy import coordinates as coord
 from astropy.time import Time
 import astropy.wcs as apwcs
-from specutils.spectra import Spectrum1D
+from specutils.spectra import Spectrum
 
-from pytodcor.lib.spectrum import Spectrum
+from pytodcor.lib.spectrum import PytodcorSpectrum
 
 logger = logging.getLogger("read_spec_arc35")
 
@@ -61,7 +61,7 @@ def read_spec_arc35(spec_file, wl_min=None, wl_max=None):
         ltt_barycorr = this_ut_mid.light_travel_time(this_coord)
         this_tdb_bjd_mid = this_ut_mid.tdb.jd*u.day + ltt_barycorr
 
-        # Generate a Spectrum1D object.
+        # Generate a Spectrum object.
         this_wcs = apwcs.WCS(header={'CDELT1': hdr0['CDELT1'], 'CRVAL1': hdr0['CRVAL1'],
                                       'CUNIT1': 'Angstrom', 'CTYPE1': hdr0['CTYPE1'],
                                       'CRPIX1': hdr0['CRPIX1']})
@@ -82,7 +82,7 @@ def read_spec_arc35(spec_file, wl_min=None, wl_max=None):
                         f"{str(wl_min)} <= wavelength <= {str(wl_max)}")
 
         # Construct the Spectrum object.
-        spec = Spectrum1D(flux=these_fls, spectral_axis=these_wls)
+        spec = Spectrum(flux=these_fls, spectral_axis=these_wls)
         this_spec = Spectrum(name=objname, air_or_vac="air", obj_coord=this_coord,
                              juldate_utc=this_ut_mid.utc.jd, bjuldate_tdb=this_tdb_bjd_mid,
                              tel_location="apo", exptime=exptime)

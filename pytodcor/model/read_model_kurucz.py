@@ -27,7 +27,7 @@ def read_model_kurucz(model_file, model_logg):
         # Set target name based on model file (add logg as well for CK04).
         objname = os.path.basename(model_file).split('.fits')[0] + "_g" + str(model_logg)
 
-        # Generate a Spectrum1D object.
+        # Generate a Spectrum object.
         wls = dat1['wavelength']
         # The spectral for different surface gravities are stored in columns defined by
         # the value of log(g) * 10, e.g., log(g) = 0.5 is stored in column "g05".
