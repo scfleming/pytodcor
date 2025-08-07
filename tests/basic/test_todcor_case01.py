@@ -110,25 +110,21 @@ class Test02:
         cls.where_y2 = np.where(cls.todcor_pixshifts == cls.y_fix_shift_2)[0][0]
 
     def test_primary_zero_shift(self):
-        peak1_pri_shift0, peak2_pri_shift0 = find_peaks(self.todcor_vals[self.where_x1, :])[0] - 400
-        assert peak1_pri_shift0 == pytest.approx(-304, abs=1)
-        assert peak2_pri_shift0 == pytest.approx(0, abs=2)
-
+        peak1_pri_zero_shift, peak2_pri_zero_shift = find_peaks(self.todcor_vals[self.where_x1, :])[0] - 400
+        assert peak1_pri_zero_shift == pytest.approx(-304, abs=1)
+        assert peak2_pri_zero_shift == pytest.approx(0, abs=2)
     def test_primary_nonzero_shift(self):
-        peak1_pri_shift200, peak2_pri_shift200 = find_peaks(self.todcor_vals[self.where_x2, :])[0] - 400
-        assert peak1_pri_shift200 == pytest.approx(-304, abs=1)
-        assert peak2_pri_shift200 == pytest.approx(0, abs=2)
-
+        peak1_pri_nonzero_shift, peak2_pri_nonzero_shift = find_peaks(self.todcor_vals[self.where_x2, :])[0] - 400
+        assert peak1_pri_nonzero_shift == pytest.approx(-304, abs=1)
+        assert peak2_pri_nonzero_shift == pytest.approx(0, abs=2)
     def test_secondary_zero_shift(self):
-        peak1_sec_shift0, peak2_sec_shift0 = find_peaks(self.todcor_vals[:, self.where_y1])[0] - 400
-        assert peak1_sec_shift0 == pytest.approx(0, abs=2)
-        assert peak2_sec_shift0 == pytest.approx(304, abs=1)
-
+        peak1_sec_zero_shift, peak2_sec_zero_shift = find_peaks(self.todcor_vals[:, self.where_y1])[0] - 400
+        assert peak1_sec_zero_shift == pytest.approx(0, abs=2)
+        assert peak2_sec_zero_shift == pytest.approx(304, abs=1)
     def test_secondary_nonzero_shift(self):
-        peak1_sec_shift200, peak2_sec_shift200 = find_peaks(self.todcor_vals[:, self.where_y2])[0] - 400
-        assert peak1_sec_shift200 == pytest.approx(0, abs=2)
-        assert peak2_sec_shift200 == pytest.approx(304, abs=1)
-
+        peak1_sec_nonzero_shift, peak2_sec_nonzero_shift = find_peaks(self.todcor_vals[:, self.where_y2])[0] - 400
+        assert peak1_sec_nonzero_shift == pytest.approx(0, abs=2)
+        assert peak2_sec_nonzero_shift == pytest.approx(304, abs=1)
 
 class Test03:
     def setup_class(cls):
@@ -230,21 +226,21 @@ class Test04:
         cls.where_y2 = np.where(cls.todcor_pixshifts == cls.y_fix_shift_2)[0][0]
 
     def test_primary_zero_shift(self):
-        peak1_pri_shift0, peak2_pri_shift0 = find_peaks(self.todcor_vals[self.where_x1, :])[0] - 400
-        assert peak1_pri_shift0 == pytest.approx(-204, abs=1)
-        assert peak2_pri_shift0 == pytest.approx(0, abs=1)
+        peak1_pri_zero_shift, peak2_pri_zero_shift = find_peaks(self.todcor_vals[self.where_x1, :])[0] - 400
+        assert peak1_pri_zero_shift == pytest.approx(-204, abs=1)
+        assert peak2_pri_zero_shift == pytest.approx(0, abs=1)
 
     def test_primary_nonzero_shift(self):
-        peak1_pri_shift200, peak2_pri_shift200 = find_peaks(self.todcor_vals[self.where_x2, :])[0] - 400
-        assert peak1_pri_shift200 == pytest.approx(-204, abs=1)
-        assert peak2_pri_shift200 == pytest.approx(0, abs=1)
+        peak1_pri_nonzero_shift, peak2_pri_nonzero_shift = find_peaks(self.todcor_vals[self.where_x2, :])[0] - 400
+        assert peak1_pri_nonzero_shift == pytest.approx(-204, abs=1)
+        assert peak2_pri_nonzero_shift == pytest.approx(0, abs=1)
 
     def test_secondary_zero_shift(self):
-        peak1_sec_shift0, peak2_sec_shift0 = find_peaks(self.todcor_vals[:, self.where_y1])[0] - 400
-        assert peak1_sec_shift0 == pytest.approx(0, abs=1)
-        assert peak2_sec_shift0 == pytest.approx(204, abs=1)
+        peak1_sec_zero_shift, peak2_sec_zero_shift = find_peaks(self.todcor_vals[:, self.where_y1])[0] - 400
+        assert peak1_sec_zero_shift == pytest.approx(0, abs=1)
+        assert peak2_sec_zero_shift == pytest.approx(204, abs=1)
 
     def test_secondary_nonzero_shift(self):
-        peak1_sec_shift200, peak2_sec_shift200 = find_peaks(self.todcor_vals[:, self.where_y2])[0] - 400
-        assert peak1_sec_shift200 == pytest.approx(0, abs=1)
-        assert peak2_sec_shift200 == pytest.approx(204, abs=1)
+        peak1_sec_nonzero_shift, peak2_sec_nonzero_shift = find_peaks(self.todcor_vals[:, self.where_y2])[0] - 400
+        assert peak1_sec_nonzero_shift == pytest.approx(0, abs=1)
+        assert peak2_sec_nonzero_shift == pytest.approx(204, abs=1)
