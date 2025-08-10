@@ -49,7 +49,7 @@ class TestCase01:
             fixed_alpha=1., vel_range=[-500., 500.]
         )
 
-    def test_case_01(self):
+    def test_todcor_case01(self):
         # Find local max peaks within the two-dimensional TODCOR array.
         # The return are indices, which can be indexed into the "pixshifts" to translate into lag values.
         twod_peaks = peak_local_max(self.todcor_vals, min_distance=4)
