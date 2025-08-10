@@ -33,7 +33,7 @@ def _find_rel_shift(lag_i, lag_j):
     """
     return lag_j - lag_i
 
-def todcor(obs_spec, model_1, model_2, n_pix_shifts, fixed_alpha=None, vel_range=None):
+def todcor(obs_spec, model_1, model_2, n_pix_shifts, fixed_alpha=None, vel_range=None, debug=False):
     """
     Performs two-dimensional cross-correlation given an observed spectrum and two model spectra to
     use as templates. Spectral wavelengths are assumed to be in the same units between the observed
@@ -61,9 +61,6 @@ def todcor(obs_spec, model_1, model_2, n_pix_shifts, fixed_alpha=None, vel_range
                        correlation values, and a two-dimensional array of TODCOR scaling
                        ratios between the two templates.
     """
-
-    # DEBUG
-    debug = True
 
     # Set a velocity range limit if none is provided.
     if not vel_range:
