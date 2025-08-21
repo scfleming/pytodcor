@@ -155,8 +155,7 @@ def load_model(model_type, teff, logg, metal, ck04_root_dir="templates/ck04/",
         elif model_type == "bosz":
             # Read in the models.
             this_airorvac = "vacuum"
-            (objname, these_wls, these_fls) = read_model_bosz(bosz_root_dir +
-                                                               models_to_read['file'].iloc[iii])
+            (objname, these_wls, these_fls) = read_model_bosz(models_to_read['file'].iloc[iii])
 
         # If requested, extract only a subset based on the wavelength range.
         keep_indices = np.where(

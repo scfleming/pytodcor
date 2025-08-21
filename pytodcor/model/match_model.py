@@ -101,7 +101,7 @@ def match_model(model_type, teff, logg, metal, lookup_dir):
     if not os.path.isdir(lookup_dir):
         logger.error("Model directory not found: %s", lookup_dir)
         raise IOError(f"Model directory not found: {lookup_dir}")
-    lookup_table_file = lookup_dir + supported_models["lookup_files"][model_type]
+    lookup_table_file = lookup_dir + "/" + supported_models["lookup_files"][model_type]
     if not os.path.isfile(lookup_table_file):
         logger.error("Model lookup table not found: %s", lookup_table_file)
         raise IOError(f"Model lookup table not found: {lookup_table_file}")
