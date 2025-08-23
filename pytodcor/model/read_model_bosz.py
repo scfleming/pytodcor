@@ -4,62 +4,64 @@
 """
 
 import logging
-import os
-from astropy.io import fits
 import numpy as np
+import os
+import pandas as pd
 import gzip
 
+from pytodcor import bosz_supported_resolutions
 
 logger = logging.getLogger("read_model_bosz")
 
-def read_model_bosz(model_file):
+def read_model_bosz(bosz_root_dir, model_file):
     """
     Reads a BOSZ model file to extract spectroscopic information.
 
-    :param model_file: The full path and name of the file containing the spectroscopic
+    :param bosz_root_dir: The path to the file containing the spectroscopic
                        model data to load.
+    :type bosz_root_dir: str
+    :param model_file: The name of the subdirectory and file containing the
+                       spectroscopic model data to load.
     :type model_file: str
-    :returns: tuple -- Spectroscopic data and object name based on the file.
+    :returns: tuple -- Spectroscopic data (wavelengths, continuum-subtracted fluxes) and object name based on the file.
     """
-    #print(f"Trying to open file: {model_file}") something I had to debug
-    if os.path.isfile(model_file):
-        #You cannot use fits stuff here, it's a txt.gz. Not sure how else to extract stuff for the hdulist
-        #"fluxes and continuum values are stored at these lower instrumental broadenings
-        with fits.open(model_file) as hdulist:
-            dat1 = hdulist[1].data
-        # Extract metadata from the primary header.
+    if os.path.isfile(bosz_root_dir + model_file):
+        # Read in the flux and continuum values.
+        fl_df = pd.read_table(bosz_root_dir + model_file, delimiter=' ',
+                               names=["fls", "conts"], dtype=np.float64)
+        fls = np.asarray(fl_df["fls"])
+        conts = np.asarray(fl_df["conts"])
+
+        # Determine the resolution of the model from the file name.
+        resolution = os.path.basename(model_file).split('_')[8][1:]
+        if resolution not in bosz_supported_resolutions:
+            logger.error("Resolution in model file not in list of supported resolutions: " + resolution)
+            raise ValueError("Resolution in model file not in list of supported resolutions: " + resolution)
+
+        # Check wavelength file exists and matches the resolution.
+        bosz_resolution_file = "bosz2024_wave_r" + resolution + ".txt"
+        if not os.path.isfile(bosz_root_dir + bosz_resolution_file):
+            logger.error("Wavelength file not found: %s", bosz_root_dir +
+                             bosz_resolution_file)
+            raise IOError(f"Wavelength file not found: {bosz_root_dir +
+                             bosz_resolution_file}")
+
+        # Read in the wavelength file.
+        wl_df = pd.read_table(bosz_root_dir + bosz_resolution_file,
+                               names=["wls"], dtype=np.float64)
+        if len(wl_df["wls"]) != len(fl_df["fls"]):
+            logger.error("Wavelength and flux arrays not equal length: %s, %s",
+                                 len(wl_df["wls"]), len(fl_df["fls"]))
+            raise ValueError("Wavelength and flux arrays not equal length: " +
+                                 str(len(wl_df['wls'])) + ", " +
+                                 str(len(fl_df['fls'])))
+
         # Set target name based on model file (add logg as well for CK04).
-        objname = os.path.basename(model_file).split('.fits')[0]
-
-        # Generate a Spectrum object.
-        wls = dat1['wavelength']
-        fls = dat1['specificintensity'] / dat1['continuum']
+        objname = os.path.basename(model_file).split('.txt.gz')[0]
     else:
-        logger.error("File not found: %s", model_file)
-        raise IOError(f"File not found: {model_file}")
-    ''' The following is just what I tried, should the way to open this txt.gz,
-     not sure how to extract the header information usually found in a fit file. 
-    '''
-    '''if os.path.isfile(model_file):
-            with gzip.open(model_file, 'rt') as f:
-                wls = []
-                fls = []
-                for line in f:
-                    if line.strip() and not line.startswith('#'):
-                        try:
-                            w, f = map(float, line.strip().split())
-                            wls.append(w)
-                            fls.append(f)
-                        except ValueError:
-                            print(f"Skipping malformed line: {line.strip()}")
-                            continue
-                wls = np.array(wls, dtype=np.float64)
-                fls = np.array(fls, dtype=np.float64)
-                objname = os.path.basename(model_file).split('.txt.gz')[0]
-                return (objname, wls, fls)
-        else:
-            logger.error("File not found: %s", model_file)
-            raise IOError(f"File not found: {model_file}")'''
-    return (objname, wls, fls)
+        logger.error("File not found: %s", bosz_root_dir + model_file)
+        raise IOError(f"File not found: {bosz_root_dir + model_file}")
 
-
+    # Return the continuum-subtracted fluxes.
+    return (objname, np.asarray(wl_df["wls"]),
+                np.asarray(fl_df["fls"]/fl_df["conts"]))

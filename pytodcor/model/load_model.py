@@ -8,6 +8,7 @@ import logging
 
 from astropy import units as u
 import numpy as np
+import os
 from specutils.spectra import Spectrum
 
 from pytodcor import supported_models
@@ -60,29 +61,41 @@ def _check_bounds(model_type, teff, logg, metal):
             raise ValueError("Metallicity of model outside bounds supported by Kurucz"
                              f" library. Must be > {metal_min_val} and < {metal_max_val}.")
     elif model_type == "bosz":
-        teff_min_val = 3500.
-        teff_max_val = 10000.
+        teff_min_val = 2800.
+        teff_max_val = 16000.
         if teff < teff_min_val or teff > teff_max_val:
             logger.error("Temperature of model outside bounds supported by BOSZ library. Must be "
                          "> %s and < %s.", teff_min_val, teff_max_val)
             raise ValueError("Temperature of model outside bounds supported by BOSZ library."
                              f" Must be > {teff_min_val} and < {teff_max_val}.")
-        if teff < 6000.:
-            logg_min_val = 0.
-            logg_max_val = 5.
-        elif teff < 8000.:
-            logg_min_val = 1.
-            logg_max_val = 5.
-        elif teff < 12000.:
-            logg_min_val = 2.
-            logg_max_val = 5.
+        if teff <= 4000.:
+            logg_min_val = -0.5
+            logg_max_val = 5.5
+        elif teff <= 4750.:
+            logg_min_val = -0.5
+            logg_max_val = 5.0
+        elif teff <= 5750.:
+            logg_min_val = 0.0
+            logg_max_val = 5.5
+        elif teff <= 7000.:
+            logg_min_val = 1.0
+            logg_max_val = 5.5
+        elif teff <= 8000.:
+            logg_min_val = 2.0
+            logg_max_val = 5.5
+        elif teff <= 12000.:
+            logg_min_val = 2.0
+            logg_max_val = 5.0
+        elif teff <= 16000.:
+            logg_min_val = 3.0
+            logg_max_val = 5.0
         if logg < logg_min_val or logg > logg_max_val:
             logger.error("Surface gravity of model outside bounds supported by BOSZ library."
                          " Must be > %s and < %s.", logg_min_val, logg_max_val)
             raise ValueError("Surface gravity of model outside bounds supported by BOSZ"
                              f" library. Must be > {logg_min_val} and < {logg_max_val}.")
-        metal_min_val = -5.0
-        metal_max_val = 1.5
+        metal_min_val = -2.5
+        metal_max_val = 0.75
         if metal < metal_min_val or metal > metal_max_val:
             logger.error("Metallicity of model outside bounds supported by BOSZ library."
                          " Must be > %s and < %s.", metal_min_val, metal_max_val)
@@ -140,6 +153,8 @@ def load_model(model_type, teff, logg, metal, ck04_root_dir="templates/ck04/",
         lookup_dir = ck04_root_dir
     elif model_type == "bosz":
         lookup_dir = bosz_root_dir
+    if lookup_dir[-1] != os.path.sep:
+        lookup_dir += os.path.sep
     models_to_read = match_model(model_type, teff, logg, metal, lookup_dir)
 
     # Read in the model sets.
@@ -149,13 +164,14 @@ def load_model(model_type, teff, logg, metal, ck04_root_dir="templates/ck04/",
             # Read in the models. Must pass in log(g) value since all gravities are grouped
             # into one file.
             this_airorvac = "vacuum"
-            (objname, these_wls, these_fls) = read_model_kurucz(ck04_root_dir +
+            (objname, these_wls, these_fls) = read_model_kurucz(lookup_dir,
                                                                  models_to_read['file'].iloc[iii],
                                                                  models_to_read["logg"].iloc[iii])
         elif model_type == "bosz":
             # Read in the models.
             this_airorvac = "vacuum"
-            (objname, these_wls, these_fls) = read_model_bosz(models_to_read['file'].iloc[iii])
+            (objname, these_wls, these_fls) = read_model_bosz(lookup_dir,
+                                                                  models_to_read['file'].iloc[iii])
 
         # If requested, extract only a subset based on the wavelength range.
         keep_indices = np.where(

@@ -37,8 +37,12 @@ supported_spec_types = ["apogee", "arc35"]
 
 # Supported types of spectral models.
 #    "kurucz" = Castelli & Kurucz 2004 models
-#    "bosz" = Bohlin et al. 2017 ATLAS9 models
+#    "bosz" = Meszaros et al. 2024 MARCS/ATLAS9 models
 supported_models = {"types":["bosz", "kurucz"],
                     "lookup_files":{"bosz":"bosz_model_files_and_parmas.txt",
                                      "kurucz":"kurucz_model_files_and_params.txt"}
                     }
+
+# Supported resolutions for BOSZ models.
+bosz_supported_resolutions = ["500", "1000", "2000", "5000", "10000", "20000",
+                                  "50000", "orig"]

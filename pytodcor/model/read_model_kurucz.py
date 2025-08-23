@@ -9,19 +9,22 @@ from astropy.io import fits
 
 logger = logging.getLogger("read_model_kurucz")
 
-def read_model_kurucz(model_file, model_logg):
+def read_model_kurucz(ck04_root_dir, model_file, model_logg):
     """
     Reads a Castelli-Kurucz model file to extract spectroscopic information.
 
-    :param model_file: The full path and name of the file containing the spectroscopic
+    :param ck04_root_dir_file: The path to the file containing the spectroscopic
+                       model data to load.
+    :type ck04_root_dir_file: str
+    :param model_file: The name of the file containing the spectroscopic
                        model data to load.
     :type model_file: str
     :param model_logg: The log(g) surface gravity of the model to retrieve.
     :type model_logg: float
     :returns: tuple -- Spectroscopic data and object name based on the file.
     """
-    if os.path.isfile(model_file):
-        with fits.open(model_file) as hdulist:
+    if os.path.isfile(ck04_root_dir + model_file):
+        with fits.open(ck04_root_dir + model_file) as hdulist:
             dat1 = hdulist[1].data
         # Extract metadata from the primary header.
         # Set target name based on model file (add logg as well for CK04).
@@ -34,6 +37,6 @@ def read_model_kurucz(model_file, model_logg):
         logg_colname = 'g' + str(int(model_logg*10))
         fls = dat1[logg_colname]
     else:
-        logger.error("File not found: %s", model_file)
-        raise IOError(f"File not found: {model_file}")
+        logger.error("File not found: %s", ck04_root_dir + model_file)
+        raise IOError(f"File not found: {ck04_root_dir + model_file}")
     return (objname, wls, fls)
