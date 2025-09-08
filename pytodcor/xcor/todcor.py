@@ -13,11 +13,9 @@ from scipy.constants import c as speedoflight
 from specutils.analysis import template_logwl_resample
 from specutils.manipulation import FluxConservingResampler
 from pytodcor.xcor.xcor1d import xcor1d
-
+from pytodcor.xcor.find_n_pix_shift import find_n_pix_shift
 import matplotlib.pyplot as plt
-
 logger = logging.getLogger("todcor")
-
 def _find_rel_shift(lag_i, lag_j):
     """
     Determines the correct index to access in a cross-correlation lag array given a shift
@@ -33,7 +31,7 @@ def _find_rel_shift(lag_i, lag_j):
     """
     return lag_j - lag_i
 
-def todcor(obs_spec, model_1, model_2, n_pix_shifts, fixed_alpha=None, vel_range=None, debug=False):
+def todcor(obs_spec, model_1, model_2, max_vel, fixed_alpha=None, debug=False):
     """
     Performs two-dimensional cross-correlation given an observed spectrum and two model spectra to
     use as templates. Spectral wavelengths are assumed to be in the same units between the observed
@@ -63,9 +61,8 @@ def todcor(obs_spec, model_1, model_2, n_pix_shifts, fixed_alpha=None, vel_range
     """
 
     # Set a velocity range limit if none is provided.
-    if not vel_range:
-        vel_range = [-1000., 1000.]
-
+    n_pix_shifts = find_n_pix_shift(obs_spec,max_vel,overshoot_factor=1.25)
+    print(n_pix_shifts)
     # Resample the obseerved spectrum, model_1 and model_2 spectra to the same log-lambda scale.
     # Use specutils.analysis.template_logwl_resample() method,
     # https://specutils.readthedocs.io/en/stable/api/specutils.analysis.template_logwl_resample.html
